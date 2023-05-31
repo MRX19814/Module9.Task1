@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 /// Создаем свой тип исключения
 public class InvalidInputException : Exception
@@ -10,53 +11,63 @@ public class InvalidInputException : Exception
 
 class Program
 {
+    /// Событие для сортировки списка фамилий
+    public static event Action<List<string>, bool> SortNamesEvent;
+
     static void Main(string[] args)
     {
-        try
-        {
-            /// Создаем массив исключений разных типов
-            var exceptions = new Exception[]
-            {
-                new DivideByZeroException(),
-                new IndexOutOfRangeException(),
-                new ArgumentNullException(),
-                new InvalidInputException("Свое исключение"),
-                new InvalidOperationException()
-            };
+        /// Инициализируем список фамилий
+        List<string> names = new List<string> { "Иванов", "Петров", "Сидоров", "Козлов", "Смирнов" };
 
-            /// Итерация по массиву исключений
-            foreach (var exception in exceptions)
+        SortNamesEvent += SortNames;
+
+        while (true)
+        {
+            Console.WriteLine("Введите число 1 для сортировки А-Я или число 2 для сортировки Я-А:");
+            string input = Console.ReadLine();
+
+            try
             {
-                try
+                /// Проверка введенных данных и генерация события
+                if (input == "1")
                 {
-                    /// Генерируем исключение
-                    throw exception;
+                    SortNamesEvent?.Invoke(names, true);
+                    break;
                 }
-                catch (DivideByZeroException)
+                else if (input == "2")
                 {
-                    Console.WriteLine("Поймано исключение DivideByZeroException");
+                    SortNamesEvent?.Invoke(names, false);
+                    break;
                 }
-                catch (IndexOutOfRangeException)
+                else
                 {
-                    Console.WriteLine("Поймано исключение IndexOutOfRangeException");
-                }
-                catch (ArgumentNullException)
-                {
-                    Console.WriteLine("Поймано исключение ArgumentNullException");
-                }
-                catch (InvalidInputException ex)
-                {
-                    Console.WriteLine("Поймано собственное исключение InvalidInputException: " + ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Поймано общее исключение: " + ex.GetType().Name);
+                    throw new InvalidInputException("Некорректный ввод. Введите число 1 или 2.");
                 }
             }
+            catch (InvalidInputException ex)
+            {
+                Console.WriteLine("Ошибка: " + ex.Message);
+            }
         }
-        catch (Exception ex)
+
+        /// Вывод отсортированного списка фамилий
+        Console.WriteLine("Отсортированный список фамилий:");
+        foreach (var name in names)
         {
-            Console.WriteLine("Поймано исключение во внешнем блоке catch: " + ex.GetType().Name);
+            Console.WriteLine(name);
+        }
+    }
+
+    /// Метод для сортировки списка фамилий
+    static void SortNames(List<string> names, bool ascending)
+    {
+        if (ascending)
+        {
+            names.Sort();
+        }
+        else
+        {
+            names.Sort((x, y) => y.CompareTo(x));
         }
     }
 }
