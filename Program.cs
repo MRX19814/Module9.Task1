@@ -16,38 +16,52 @@ class Program
 
     static void Main(string[] args)
     {
-        /// Инициализируем список фамилий
         List<string> names = new List<string> { "Иванов", "Петров", "Сидоров", "Козлов", "Смирнов" };
 
         SortNamesEvent += SortNames;
 
-        while (true)
+        try
         {
-            Console.WriteLine("Введите число 1 для сортировки А-Я или число 2 для сортировки Я-А:");
-            string input = Console.ReadLine();
+            while (true)
+            {
+                Console.WriteLine("Введите число 1 для сортировки А-Я или число 2 для сортировки Я-А:");
+                string input = Console.ReadLine();
 
-            try
-            {
-                /// Проверка введенных данных и генерация события
-                if (input == "1")
+                try
                 {
-                    SortNamesEvent?.Invoke(names, true);
-                    break;
+                    /// Проверка введенных данных и генерация события
+                    if (input == "1")
+                    {
+                        SortNamesEvent?.Invoke(names, true);
+                        break;
+                    }
+                    else if (input == "2")
+                    {
+                        SortNamesEvent?.Invoke(names, false);
+                        break;
+                    }
+                    else
+                    {
+                        throw new InvalidInputException("Некорректный ввод. Введите число 1 или 2.");
+                    }
                 }
-                else if (input == "2")
+                catch (InvalidInputException ex)
                 {
-                    SortNamesEvent?.Invoke(names, false);
-                    break;
+                    Console.WriteLine("Ошибка: " + ex.Message);
                 }
-                else
+                finally
                 {
-                    throw new InvalidInputException("Некорректный ввод. Введите число 1 или 2.");
+                    Console.WriteLine("Блок finally выполнен.");
                 }
             }
-            catch (InvalidInputException ex)
-            {
-                Console.WriteLine("Ошибка: " + ex.Message);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Поймано исключение: " + ex.GetType().Name);
+        }
+        finally
+        {
+            Console.WriteLine("Блок finally во внешнем блоке catch выполнен.");
         }
 
         /// Вывод отсортированного списка фамилий
